@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-// MenuItem Component
+// MenuItem Component stays the same
 const MenuItem = ({ title, description, imageName, price, quantity, onAdd, onRemove }) => {
   return (
     <div className="menu-item">
@@ -104,6 +104,7 @@ const menuItems = [
 function App() {
   const [cart, setCart] = useState({});
   const [showReceipt, setShowReceipt] = useState(false);
+  const [alert, setAlert] = useState({ show: false, message: '', type: '' });
 
   const addToCart = (itemId) => {
     setCart(prevCart => ({
@@ -127,6 +128,7 @@ function App() {
   const clearCart = () => {
     setCart({});
     setShowReceipt(false);
+    setAlert({ show: false, message: '', type: '' });
   };
 
   const calculateTotal = () => {
@@ -136,14 +138,45 @@ function App() {
     }, 0);
   };
 
+  const showAlertMessage = (message, type) => {
+    setAlert({ show: true, message, type });
+    setTimeout(() => setAlert({ show: false, message: '', type: '' }), 3000);
+  };
+
   const handleOrder = () => {
     if (Object.keys(cart).length > 0) {
       setShowReceipt(true);
+      showAlertMessage(`Order placed successfully! Total: $${calculateTotal().toFixed(2)}`, 'success');
+    } else {
+      showAlertMessage('Please add items to your cart before ordering', 'danger');
     }
   };
 
   return (
     <div className="container">
+      {alert.show && (
+        <div 
+          className={`alert alert-${alert.type} alert-dismissible fade show`}
+          role="alert"
+          style={{
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            zIndex: 1000,
+            width: 'auto',
+            minWidth: '300px'
+          }}
+        >
+          {alert.message}
+          <button 
+            type="button" 
+            className="btn-close" 
+            onClick={() => setAlert({ show: false, message: '', type: '' })}
+            aria-label="Close"
+          ></button>
+        </div>
+      )}
+
       <header className="text-center my-5">
         <h1 className="main-title">Japanese Cuisine</h1>
         <p className="fancy-text">Authentic Japanese Flavors</p>
@@ -154,7 +187,6 @@ function App() {
         <button 
           className="add-btn me-2"
           onClick={handleOrder}
-          disabled={Object.keys(cart).length === 0}
         >
           Order
         </button>
